@@ -5,32 +5,35 @@ import (
 	"fmt"
 	"net/http"
 
-	// "github.com/smc181002/go-jwt-http/"
+	// "github.com/smc181002/go-jwt-http-chi/middlewares"
+	"github.com/smc181002/go-jwt-http-chi/routes"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
   "github.com/go-chi/cors"
-
 )
 
-func AllowMethod(next http.Handler) http.Handler {
-  return http.HandlerFunc(func (w http.ResponseWriter, r *http.Request)  {
-      // get the context from the given router
-      rctx := chi.RouteContext(r.Context())
+var port int
 
-      // Temporary context
-      ctx := chi.NewRouteContext()
-      fmt.Println(rctx.Routes.Match(ctx, r.Method, r.URL.Path))
-      next.ServeHTTP(w, r.WithContext(r.Context()))
-      fmt.Println("something")
-      /* fmt.Println("Options")
-      next.ServeHTTP(w, r.WithContext(r.Context())) */
-  })
+/* func basicGet (w http.ResponseWriter, r *http.Request)  {
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprint(w, "Hello there - GET");
 }
 
-var port int
+func basicPost(w http.ResponseWriter, r *http.Request)  {
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprint(w, "Hello there - POST");
+} */
+
+
 func main() {
   flag.IntVar(&port, "p", 8080, "Enter the port number for the server")
   flag.Parse()
   app := chi.NewRouter()
+
+  app.Use(middleware.RequestID)
+  app.Use(middleware.RealIP)
+  app.Use(middleware.Logger)
+  app.Use(middleware.Recoverer)
 
   app.Use(cors.Handler(cors.Options{
     // AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
@@ -44,25 +47,13 @@ func main() {
     MaxAge:           300, // Maximum value not ignored by any of major browsers
   }))
 
-  app.Use(AllowMethod)
+  // app.Use(middlewares.MethodCheck)
+  app.Group(routes.Posts)
+  app.Group(routes.Auth)
 
-  app.Get("/", func (w http.ResponseWriter, r *http.Request)  {
-    w.WriteHeader(http.StatusOK)
-    fmt.Fprint(w, "Hello there - GET");
-  })
+  /* app.Get("/", basicGet)
 
-  app.Post("/", func (w http.ResponseWriter, r *http.Request)  {
-    w.WriteHeader(http.StatusOK)
-    fmt.Fprint(w, "Hello there - POST");
-  })
-
-  /* r := mux.NewRouter()
-
-  r.HandleFunc("/", func (w http.ResponseWriter, r *http.Request)  {
-    w.WriteHeader(http.StatusOK)
-    fmt.Fprint(w, "Hello there");
-  }).Methods("GET")
- */
+  app.With(middlewares.Authenticate).Post("/", basicPost) */
 
   fmt.Printf("server listening on port %v\n", port)
   http.ListenAndServe(fmt.Sprintf(":%v", port), app)
