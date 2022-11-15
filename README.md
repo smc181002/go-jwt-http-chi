@@ -59,9 +59,9 @@ we can get the JWT token by sending `POST` request to
 
 ```bash
 curl \
---data '{"name": "smc", "password": "passwd@123"}' \
+--data '{"uname": "smc", "password": "passwd@123"}' \
 -H 'Content-Type: application/json' \
-http://localhost:3000/get-token
+http://localhost:8080/get-token
 ```
 
 save the output value in environmental variables from the 
@@ -76,7 +76,7 @@ like below.
 To request public endpoint, send `GET` request to `/posts`
 
 ```bash
-curl http://localhost:3000/posts/
+curl http://localhost:8080/posts/
 To get the protected routes, we can send the token through 
 Authorization Header as Bearer token.
 ```
@@ -84,5 +84,5 @@ Authorization Header as Bearer token.
 ```bash
 curl \
 -H "Authorization: Bearer $TOKEN" \
-http://localhost:3000/secret-posts
+http://localhost:8080/secret-posts
 ```
